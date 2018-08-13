@@ -4,6 +4,31 @@
     <meta charset="utf-8">
     <title>Admin - BlobStash</title>
     <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+{{ if .commit }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>
+console.log("commit js");
+window.onload = function() {
+console.log("init hljs");
+hljs.initHighlighting();
+}
+</script>
+{{ end }}
+
+<style>
+  dt {
+    float: left;
+    clear: left;
+    width: 140px;
+    text-align: left;
+    font-weight: bold;
+  }
+  dl dd {
+    margin: 0 0 5px 110px;
+  }
+</style>
+
   </head>
   <body>
 
@@ -13,35 +38,58 @@
 
 <ul class="nav">
   <li class="nav-item">
-    <a href="#" style="text-transform:uppercase">BlobStash</a>
+    <a href="/api/apps/admin" style="text-transform:uppercase">BlobStash</a>
   </li>
   <li class="nav-item active">
-    <a href="#">Git Repositories</a>
+    <a href="/api/apps/admin/git">Git Repositories</a>
   </li>
 </ul>
 
   
 	</div>
     <div class="column col-10">
-<div style="margin:10px 0;">
-<h2>Git Repositories</h2>
-<h3>{{ .ns }} / {{ .repo }}</h3>
+<div style="margin:10px 0;max-width: 800px;">
 
+<!-- List all nanmespaces/repositories -->
+{{ if .data }}
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>namespace / repository</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range .data }}
+    <tr>
+        <td>{{ .ns }} / <a href="/api/apps/admin/git/{{.ns}}/{{.repo}}">{{.repo}}</a></td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}
+
+
+{{ if not .data }}
+<h3>{{ .ns }} / {{ .repo }}</h3>
 <ul class="tab">
-  <li class="tab-item active">
-    <a href="#">
+    <li class="tab-item{{ if .summary}} active{{ end }}">
+    <a href="/api/apps/admin/git/{{ $.ns }}/{{ $.repo }}">
       Summary
     </a>
   </li>
-  <li class="tab-item">
-	<a href="#">Refs</a>
+  <li class="tab-item {{ if .refs }} active{{ end }}">
+      <a href="/api/apps/admin/git/{{ $.ns }}/{{ $.repo }}/refs">Refs</a>
   </li>
-  <li class="tab-item">
-	<a href="#">Log</a>
+  <li class="tab-item {{ if .log }} active{{ end }}">
+      <a href="/api/apps/admin/git/{{ $.ns }}/{{ $.repo }}/log">Log</a>
   </li>
-  <li class="tab-item">
-	<a href="#">Tree</a>
+  <li class="tab-item{{ if or .file .tree }} active{{ end }}">
+      <a href="/api/apps/admin/git/{{ $.ns }}/{{ $.repo }}/tree">Tree</a>
   </li>
+  {{ if .commit }}
+  <li class="tab-item active">
+      <a href="#">Commit</a>
+  </li>{{ end }}
   <li class="tab-item tab-action">
     <div class="input-group input-inline">
       <input class="form-input input-sm" type="text" placeholder="search">
@@ -50,6 +98,101 @@
   </li>
 </ul>
 
+{{ end }}
+
+
+{{ if .file }}
+<p style="margin-top:30px;">
+<strong>{{ .name }}</strong> <a href="...">[plain]</a> <a href="...">[download]</a>
+</p>
+{{ if not .file.is_binary }}
+<pre class="code" data-lang="{{.file.hash}}"><code>{{ .file.contents }}</code></pre>
+{{ else }}
+[binary file]
+{{ end }}
+{{ end }}
+
+{{ if .tree }}
+<table class="table table-striped table-hover" style="margin-top:30px;">
+  <thead>
+    <tr>
+      <th style="width:150px;">Mode</th>
+      <th>Name</th>
+    </tr>
+  </thead>
+  <tbody>
+{{ range .tree }}
+    <tr>
+        <td>{{ .mode }}</td>
+        <td>{{ if .is_file }}<a href="/api/apps/admin/git/{{$.ns}}/{{$.repo}}/file/{{ .hash }}/{{ .name }}">{{ .name }}</a>
+            {{ else }}<a href="/api/apps/admin/git/{{$.ns}}/{{$.repo}}/tree/{{ .hash }}">{{.name }}</a>{{ end }}</td>
+    </tr>
+{{ end }}
+  </tbody>
+</table>
+{{ end }}
+
+
+{{ if .commit }}
+<dl style="margin-top:30px;">
+
+<dt>hash</dt>
+<dd><code>{{ .commit.hash }}</code></dd>
+
+<dt>author</dt>
+<dd>{{ .commit.author_name }} <{{ .commit.author_email }}> {{ .commit.author_time }}</dd>
+
+<dt>comitter</dt>
+<dd>{{ .commit.comitter_name }} <{{ .commit.comitter_email }}> {{ .commit.comitter_time }}</dd>
+
+<dt>tree</dt>
+<dd><a href="/api/apps/admin/git/{{$.ns}}/{{$.repo}}/tree/{{ .commit.tree_hash }}"><code>{{ .commit.tree_hash }}</code></a></dd>
+
+<dt>parent</dt>
+<dd><a href="/api/apps/admin/git/{{$.ns}}/{{$.repo}}/commit/{{ .commit.parent_hash }}"><code>{{ .commit.parent_hash }}</code></a></dd>
+
+</dl>
+<p class="text-large" style="margin:20px 0;">{{ .commit.message }}</p>
+
+<div class="bg-gray" style="padding:10px;">
+<p><strong>{{ .commit.stats.files_changed }}</strong> files changed, <strong>{{ .commit.stats.additions }}</strong> additions and <strong>{{ .commit.stats.deletions }}</strong> deletions.</p>
+<ul>
+{{ range .commit.file_stats }}
+<li><strong>{{ .name }}</strong> <span class="text-success">+{{ .additions }}</span> <span class="text-error">-{{.deletions}}</span></li>
+{{ end }}
+</ul>
+</div>
+
+<pre style="margin: 30px 0;"><code class="diff">{{ .commit.patch }}</code></pre>
+
+
+{{ end }}
+
+
+{{ if .log }}
+<table class="table table-striped table-hover" style="margin-top:30px;">
+  <thead>
+    <tr>
+      <th>Age</th>
+      <th>Commit message</th>
+      <th>Author</th>
+    </tr>
+  </thead>
+  <tbody>
+{{ range .log }}
+    <tr>
+        <td>{{ .author_time_ago }}</td>
+        <td><a href="/api/apps/admin/git/{{$.ns}}/{{$.repo}}/commit/{{.hash}}">{{ .message }}</a></td>
+        <td>{{ .author_name }}</td>
+    </tr>
+{{ end }}
+  </tbody>
+</table>
+{{ end }}
+
+
+
+{{ if .refs }}
 <table class="table table-striped table-hover" style="margin-top:30px;">
   <thead>
     <tr>
@@ -60,10 +203,10 @@
     </tr>
   </thead>
   <tbody>
-{{ range .summary.branches }}
+{{ range .refs.branches }}
     <tr>
         <td>{{ .ref_short_name }}</td>
-        <td>{{ .commit_message }}</td>
+        <td><a href="/api/apps/admin/git/{{$.ns}}/{{$.repo}}/commit/{{.commit_hash}}">{{ .commit_message }}</a></td>
         <td>{{ .commit_author_name }}</td>
         <td>{{ .commit_time_ago }}</td>
     </tr>
@@ -83,10 +226,10 @@
     </tr>
   </thead>
   <tbody>
-{{ range .summary.tags }}
+{{ range .refs.tags }}
     <tr>
         <td>{{ .ref_short_name }}</td>
-        <td>{{ .commit_message }}</td>
+        <td><a href="/api/apps/admin/git/{{$.ns}}/{{$.repo}}/commit/{{.commit_hash}}">{{ .commit_message }}</a></td>
         <td>{{ .commit_author_name }}</td>
         <td>{{ .commit_time_ago }}</td>
     </tr>
@@ -94,6 +237,13 @@
   </tbody>
 </table>
 
+{{ end }}
+
+{{ if .summary }}
+
+<div class="bg-gray" style="padding:10px;margin-top:30px;text-align:center;">
+<strong>Clone URL</strong> (read-write)<br><code>[TODO:proto]://[username]:[password]@[TODO:host from request]/git/{{.ns}}/{{.repo}}.git</code>
+</div>
 
 <table class="table table-striped table-hover" style="margin-top:30px;">
   <thead>
@@ -106,21 +256,28 @@
   <tbody>
 {{ range .summary.commits }}
     <tr>
-        <td>{{ .time_ago }}</td>
-        <td>{{ .message }}</td>
+        <td>{{ .author_time_ago }}</td>
+        <td><a href="/api/apps/admin/git/{{$.ns}}/{{$.repo}}/commit/{{.hash}}">{{ .message }}</a></td>
         <td>{{ .author_name }}</td>
     </tr>
 {{ end }}
   </tbody>
 </table>
 
+<div style="margin:30px 0;">
+<h4>README</h4>
+{{ if .summary.readme }}
+<pre class="code"><code>{{ .summary.readme.contents }}</code></pre>
+{{ end }}
+</div>
+<!-- end summary -->
+{{ end }}
 
 
 </div>
 
 	</div>
 </div>
-
 
   </body>
 </html>
