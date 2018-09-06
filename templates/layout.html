@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Admin - BlobStash</title>
+    <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+    {{ template "head" . }}
+
+<style>
+  dt {
+    float: left;
+    clear: left;
+    width: 140px;
+    text-align: left;
+    font-weight: bold;
+  }
+  dl dd {
+    margin: 0 0 5px 110px;
+  }
+</style>
+
+  </head>
+  <body>
+
+<div class="container">
+<div class="columns col-oneline">
+    <div class="column col-2" style="height:100vh;">
+
+<ul class="nav">
+  <li class="nav-item">
+    <a href="/api/apps/admin" style="text-transform:uppercase">BlobStash</a>
+  </li>
+  <li class="nav-item {{ template "kvstore-menu" . }}">
+    <a href="/api/apps/admin/kvstore">KV Store</a>
+  </li>
+  <li class="nav-item {{ template "filetree-menu" . }}">
+    <a href="/api/apps/admin/filetree">Filetree</a>
+  </li>
+  <li class="nav-item {{ template "git-menu" . }}">
+    <a href="/api/apps/admin/git">Git Repositories</a>
+  </li>
+</ul>
+
+	</div>
+    <div class="column col-10">
+<div style="margin:10px 0;max-width: 800px;">
+
+    {{ template "main" . }}
+
+
+</div>
+
+	</div>
+</div>
+</div>
+
+  </body>
+</html>

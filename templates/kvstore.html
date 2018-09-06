@@ -1,0 +1,47 @@
+{{ define "git-menu" }}{{ end }}
+{{ define "filetree-menu" }}{{ end }}
+{{ define "kvstore-menu" }}active{{ end }}
+{{ define "head" }}{{ end }}
+{{ define "main" }}
+
+{{ if .keys }}
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>key</th>
+      <th>version</th>
+      <th>ref</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range .keys }}
+    <tr>
+        <td><a href="/api/apps/admin/kvstore?key={{ .key }}&version={{ .version}}">{{ .key }}</a></td>
+        <td>{{ .version }}</td>
+        <td>{{ .ref }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}
+
+
+{{ if .kv }}
+<dl style="margin-top:30px;">
+
+<dt>key</dt>
+<dd>{{ .kv.key }}</dd>
+
+<dt>version</dt>
+<dd>{{ .kv.version }}</dd>
+
+<dt>ref</dt>
+<dd><code>{{ .kv.ref }}</code></dd>
+
+<dt>data</dt>
+<dd><pre><code>{{ .kv.data }}</code></pre><dd>
+
+</dl>
+{{ end }}
+
+{{ end }}
