@@ -1,0 +1,41 @@
+{{ define "docstore-menu" }}{{ end }}
+{{ define "git-menu" }}{{ end }}
+{{ define "filetree-menu" }}{{ end }}
+{{ define "blobstore-menu" }}active{{ end }}
+{{ define "kvstore-menu" }}{{ end }}
+{{ define "head" }}{{ end }}
+{{ define "main" }}
+
+{{ if .hash }}
+
+<dl style="margin-top:30px;">
+
+<dt>hash</dt>
+<dd><code>{{ .hash }}</code></dd>
+
+</dl>
+
+<pre><code>{{ .data }}</code></pre>
+
+{{ end }}
+
+{{ if .blobs }}
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Hash</th>
+      <th>Size</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range .blobs }}
+    <tr>
+        <td><a href="/api/apps/admin/blobstore/{{ .hash }}"><code>{{.hash}}</code></a></td>
+        <td>{{ .size_human }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}
+
+{{ end }}

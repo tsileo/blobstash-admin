@@ -30,8 +30,14 @@
   <li class="nav-item">
     <a href="/api/apps/admin" style="text-transform:uppercase">BlobStash</a>
   </li>
+  <li class="nav-item {{ template "blobstore-menu" . }}">
+    <a href="/api/apps/admin/blobstore">Blob Store</a>
+  </li>
   <li class="nav-item {{ template "kvstore-menu" . }}">
     <a href="/api/apps/admin/kvstore">KV Store</a>
+  </li>
+  <li class="nav-item {{ template "docstore-menu" . }}">
+    <a href="/api/apps/admin/docstore">Doc Store</a>
   </li>
   <li class="nav-item {{ template "filetree-menu" . }}">
     <a href="/api/apps/admin/filetree">Filetree</a>

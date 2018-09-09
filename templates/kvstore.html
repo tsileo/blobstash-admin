@@ -1,5 +1,7 @@
 {{ define "git-menu" }}{{ end }}
+{{ define "docstore-menu" }}{{ end }}
 {{ define "filetree-menu" }}{{ end }}
+{{ define "blobstore-menu" }}{{ end }}
 {{ define "kvstore-menu" }}active{{ end }}
 {{ define "head" }}{{ end }}
 {{ define "main" }}
@@ -8,17 +10,15 @@
 <table class="table table-striped table-hover">
   <thead>
     <tr>
-      <th>key</th>
-      <th>version</th>
-      <th>ref</th>
+      <th>Key</th>
+      <th>Version</th>
     </tr>
   </thead>
   <tbody>
     {{ range .keys }}
     <tr>
         <td><a href="/api/apps/admin/kvstore?key={{ .key }}&version={{ .version}}">{{ .key }}</a></td>
-        <td>{{ .version }}</td>
-        <td>{{ .ref }}</td>
+        <td><span style="border-bottom:1px dotted black;" title="{{ .version_human }}">{{ .version }}</span></td>
     </tr>
     {{ end }}
   </tbody>
@@ -33,7 +33,7 @@
 <dd>{{ .kv.key }}</dd>
 
 <dt>version</dt>
-<dd>{{ .kv.version }}</dd>
+<dd><span style="border-bottom:1px dotted black;" title="{{ .kv.version_human }}">{{ .kv.version }}</span></dd>
 
 <dt>ref</dt>
 <dd><code>{{ .kv.ref }}</code></dd>

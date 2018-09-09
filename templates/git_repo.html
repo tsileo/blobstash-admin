@@ -12,8 +12,10 @@ hljs.initHighlighting();
 {{ end }}
 {{ end }}
 {{ define "git-menu" }}active{{ end }}
+{{ define "blobstore-menu" }}{{ end }}
 {{ define "kvstore-menu" }}{{ end }}
 {{ define "filetree-menu" }}{{ end }}
+{{ define "docstore-menu" }}{{ end }}
 
 {{ define "main" }}
 <!-- List all nanmespaces/repositories -->
@@ -21,7 +23,7 @@ hljs.initHighlighting();
 <table class="table table-striped table-hover">
   <thead>
     <tr>
-      <th>namespace / repository</th>
+      <th>Namespace / Repository</th>
     </tr>
   </thead>
   <tbody>

@@ -2,6 +2,12 @@ local template = require('template')
 local router = require('router').new()
 local gs = require('gitserver')
 local kvs = require('kvstore')
+local ft = require('filetree')
+local bs = require('blobstore')
+
+router:get('/', function(params)
+  app.response:write(template.render('index.html', 'layout.html', {}))
+end)
 
 router:get('/kvstore', function(params)
   if app.request:args():get("key") ~= "" then
@@ -13,8 +19,42 @@ router:get('/kvstore', function(params)
   app.response:write(template.render('kvstore.html', 'layout.html', { keys = keys, cursor = cursor }))
 end)
 
+router:get('/blobstore', function(params)
+  local blobs, cursor = bs.blobs("")
+  app.response:write(template.render('blobstore.html', 'layout.html', { blobs = blobs }))
+end)
+
+router:get('/blobstore/:hash', function(params)
+  local data, cursor = bs.get(params.hash)
+  app.response:write(template.render('blobstore.html', 'layout.html', { blobs = nil, data = data, hash = params.hash }))
+end)
+
 router:get('/filetree', function(params)
-  app.response:write(template.render('filetree.html', 'layout.html', {}))
+  local data = ft.iter_fs()
+  app.response:write(template.render('filetree.html', 'layout.html', { data = data }))
+end)
+
+router:get('/filetree/:ref/:name/:cref', function(params)
+  local node, path = ft.node(params.ref, params.cref)
+  if node.name == '_root' then
+      node.name = name
+  end
+  app.response:write(template.render('filetree.html', 'layout.html', { ref = params.ref, name = params.name, node = node, path = path }))
+end)
+
+router:get('/filetree/:ref/:name', function(params)
+  local root = ft.fs(params.ref)
+  root.name = params.name
+  app.response:write(template.render('filetree.html', 'layout.html', { ref = params.ref, name = params.name, node = root }))
+end)
+
+router:get('/docstore', function(params)
+  local collections = { 'test' }
+  app.response:write(template.render('docstore.html', 'layout.html', { collections = collections }))
+end)
+
+router:get('/docstore/:col', function(params)
+  app.response:write(template.render('docstore.html', 'layout.html', { col = params.col, collections = {} }))
 end)
 
 router:get('/git', function(params)

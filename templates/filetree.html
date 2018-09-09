@@ -1,10 +1,64 @@
 {{ define "git-menu" }}{{ end }}
 {{ define "filetree-menu" }}active{{ end }}
+{{ define "blobstore-menu" }}{{ end }}
 {{ define "kvstore-menu" }}{{ end }}
+{{ define "docstore-menu" }}{{ end }}
 {{ define "head" }}{{ end }}
 {{ define "main" }}
 
-{{ if .fs }}
+{{ range .path }}
+{{ if eq .name "_root" }}
+<a href="/api/apps/admin/filetree/{{ $.ref }}/{{ $.name }}">{{ $.name }}</a> / 
+{{ else }}
+<a href="/api/apps/admin/filetree/{{ $.ref }}/{{ $.name }}/{{ .ref }}">{{ .name }}</a> / 
+{{ end }}
+{{ end }}
+{{ if .node }}
+{{ .node.name }}
+
+{{ if .node }}
+{{ if eq .node.type "dir" }}
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Mode</th>
+      <th>Size</th>
+      <th>ModTime</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range .node.children }}
+    <tr>
+        <td><a href="/api/apps/admin/filetree/{{ $.ref }}/{{ $.name }}/{{ .hash }}">{{ .name }}</a></td>
+        <td>{{ .mode }}</td>
+        <td>{{ .size_human }}</td>
+        <td>{{ .mtime }}</td>
+        <td>{{ if eq .type "file" }}<a href="{{ .dl_url }}">[download]</a> <a href="{{ .url }}">[open]</a>{{ end }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ else }}
+
+<dl style="margin-top:30px;">
+
+<dt>hash</dt>
+<dd><code>{{ .node.hash }}</code></dd>
+
+<dt>name</dt>
+<dd>{{ .node.name }}</dd>
+
+</dl>
+
+
+{{ end }}
+{{ end }}
+
+{{ end }}
+
+{{ if .data }}
 <table class="table table-striped table-hover">
   <thead>
     <tr>
@@ -12,9 +66,9 @@
     </tr>
   </thead>
   <tbody>
-    {{ range .fs }}
+    {{ range .data }}
     <tr>
-        <td><a href="/api/apps/admin/filetree">{{ . }}</a></td>
+        <td><a href="/api/apps/admin/filetree/{{ .ref }}/{{ .name }}">{{ .name }}</a></td>
     </tr>
     {{ end }}
   </tbody>
