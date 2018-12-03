@@ -122,7 +122,7 @@ end)
 
 router:get('/git/:ns/:repo', function(params)
   local repo = gs.repo(params.ns, params.repo)
-  app.response:write(template.render('git_repo.html', 'layout.html', { ns = params.ns, repo = params.repo, summary = repo:summary() }))
+  app.response:write(template.render('git_repo.html', 'layout.html', { host = app.request:host(), scheme = app.request:scheme(), ns = params.ns, repo = params.repo, summary = repo:summary() }))
 end)
 
 router:run()
