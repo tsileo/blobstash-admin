@@ -1,12 +1,20 @@
 local template = require('template')
+local json = require('json')
 local router = require('router').new()
 local gs = require('gitserver')
 local kvs = require('kvstore')
 local ft = require('filetree')
 local bs = require('blobstore')
+local docstore = require('docstore')
+local apps = require('apps')
 
 router:get('/', function(params)
   app.response:write(template.render('index.html', 'layout.html', {}))
+end)
+
+router:get('/apps', function(params)
+  local apps = apps.apps()
+  app.response:write(template.render('apps.html', 'layout.html', { apps = apps }))
 end)
 
 router:get('/kvstore', function(params)
@@ -54,8 +62,26 @@ router:get('/docstore', function(params)
 end)
 
 router:get('/docstore/:col', function(params)
-  app.response:write(template.render('docstore.html', 'layout.html', { col = params.col, collections = {} }))
+  local col = docstore.col(params.col)
+  local docs, _, cursor  = col:query("", 100, function(doc) return true end)
+  local jdocs = {}
+  for _, d in ipairs(docs) do
+    table.insert(jdocs, {doc=d, js=json.encode(d)})
+  end
+  app.response:write(template.render('docstore.html', 'layout.html', { code = nil, col = params.col, collections = {}, docs = jdocs }))
 end)
+
+router:post('/docstore/:col', function(params)
+  local col = docstore.col(params.col)
+  local code = app.request:form():get('code')
+  local docs, _, cursor  = col:query("", 100, code)
+  local jdocs = {}
+  for _, d in ipairs(docs) do
+    table.insert(jdocs, {doc=d, js=json.encode(d)})
+  end
+  app.response:write(template.render('docstore.html', 'layout.html', { code = code, col = params.col, collections = {}, docs = jdocs }))
+end)
+
 
 router:get('/git', function(params)
   local data = {}

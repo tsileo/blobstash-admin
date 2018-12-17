@@ -242,7 +242,7 @@ hljs.initHighlighting();
 <div style="margin:30px 0;">
 <h4>README</h4>
 {{ if .summary.readme }}
-<pre class="code"><code>{{ .summary.readme.contents }}</code></pre>
+{{ markdownify .summary.readme }}
 {{ end }}
 </div>
 <!-- end summary -->

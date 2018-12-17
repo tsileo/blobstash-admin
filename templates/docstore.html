@@ -23,4 +23,19 @@
 </table>
 {{ end }}
 
+{{ if .col }}
+<h3>{{ .col }}</h3>
+<form method="POST" action="">
+    <textarea name="code" rows="6" cols="50">{{ if .code }}{{ .code }}{{else}}return function(doc)
+  return true
+end{{ end }}</textarea>
+    <p><button type="submit">Search</button></p>
+</form>
+    {{ range .docs }}
+    <a href="/api/apps/admin/docstore/{{$.col}}?_id={{.doc._id}}">{{.doc._id}}</a>
+    <pre class="code"><code>{{.js}}</code></pre>
+    {{ end }}
+
+{{ end }}
+
 {{ end }}
