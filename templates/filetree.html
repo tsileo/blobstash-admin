@@ -42,6 +42,14 @@
 </table>
 {{ else }}
 
+{{ if .node.is_video }}
+<div style="margin:30px auto;">
+<video controls>
+<source src="{{ .node.webm_url }}" type="video/webm">
+Sorry, your browser doesn't support embedded videos.
+</video>
+</div>
+{{ end }}
 <dl style="margin-top:30px;">
 
 <dt>hash</dt>
@@ -51,6 +59,7 @@
 <dd>{{ .node.name }}</dd>
 
 </dl>
+
 
 
 {{ end }}
