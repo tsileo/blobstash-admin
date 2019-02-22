@@ -43,8 +43,8 @@
 {{ else }}
 
 {{ if .node.is_video }}
-<div style="margin:30px auto;">
-<video controls>
+m<div style="margin:30px auto;">
+<video controls poster="{{ .node.webm_poster_url }}">
 <source src="{{ .node.webm_url }}" type="video/webm">
 Sorry, your browser doesn't support embedded videos.
 </video>
@@ -52,11 +52,26 @@ Sorry, your browser doesn't support embedded videos.
 {{ end }}
 <dl style="margin-top:30px;">
 
+<dt>name</dt>
+<dd>{{ .node.name }}</dd>
+
 <dt>hash</dt>
 <dd><code>{{ .node.hash }}</code></dd>
 
-<dt>name</dt>
-<dd>{{ .node.name }}</dd>
+{{ if .node.is_video }}
+
+<dt>duration</dt>
+<dd>{{ .node.video_duration }}</dd>
+
+
+<dt>codec</dt>
+<dd>{{ .node.video_codec }}</dd>
+
+<dt>format</dt>
+<dd>{{ .node.video_width }} x {{ .node.video_height }}</dd>
+
+{{ end }}
+
 
 </dl>
 
