@@ -31,11 +31,11 @@
   <tbody>
     {{ range .node.children }}
     <tr>
-        <td><a href="/api/apps/admin/filetree/{{ $.ref }}/{{ $.name }}/{{ .hash }}">{{ .name }}</a></td>
-        <td>{{ .mode }}</td>
-        <td>{{ .size_human }}</td>
-        <td>{{ .mtime }}</td>
-        <td>{{ if eq .type "file" }}<a href="{{ .dl_url }}">[download]</a> <a href="{{ .url }}">[open]</a>{{ end }}</td>
+        <td class="truncate" style="font-size:0.9em;"><a title="{{ .name }}" href="/api/apps/admin/filetree/{{ $.ref }}/{{ $.name }}/{{ .hash }}">{{ .name }}</a></td>
+        <td style="white-space:nowrap;font-size:0.9em;">{{ .mode }}</td>
+        <td style="white-space:nowrap;font-size:0.9em;">{{ .size_human }}</td>
+        <td style="font-size:0.9em;">{{ .mtime_short }}</td>
+        <td>{{ if eq .type "file" }}<a href="{{ .dl_url }}">[dl]</a> <a href="{{ .url }}">[o]</a>{{ end }}</td>
     </tr>
     {{ end }}
   </tbody>
@@ -55,8 +55,11 @@ Sorry, your browser doesn't support embedded videos.
 <dt>name</dt>
 <dd>{{ .node.name }}</dd>
 
-<dt>hash</dt>
-<dd><code>{{ .node.hash }}</code></dd>
+<dt>size</dt>
+<dd>{{ .node.size_human }}</dd>
+
+<dt>modetime</dt>
+<dd>{{ .node.mtime }}</dd>
 
 {{ if .node.is_video }}
 
@@ -72,6 +75,8 @@ Sorry, your browser doesn't support embedded videos.
 
 {{ end }}
 
+<dt>hash</dt>
+<dd><code>{{ .node.hash }}</code></dd>
 
 </dl>
 
