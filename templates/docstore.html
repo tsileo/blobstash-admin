@@ -25,16 +25,54 @@
 
 {{ if .col }}
 <h3>{{ .col }}</h3>
+{{ if .schema }}
+<form method="POST" action="/api/apps/admin/docstore/test/new{{if .cid }}?cid={{.cid}}{{end}}">
+{{ $idoc := .cdoc }}
+{{ range .schema }}
+{{ if eq .field_type "STR" }}
+<div><input placeholder="{{.field_name}}" type="text" name="{{ .field_name }}" {{ if $idoc }}value="{{index $idoc .field_name}}"{{end}}></div>
+{{ else if eq .field_type "TXT" }}
+<div><textarea placeholder="{{.field_name}}" name="{{ .field_name }}">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
+{{ else if eq .field_type "MD" }}
+<div><textarea placeholder="{{ .field_name }}" name="{{ .field_name }}" rows="6" cols="80">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
+{{ end }}
+{{ end }}
+<div><input type="submit" value="{{ if .cid }}Edit{{ else }}Create{{end}}"><div>
+</form>
+{{ end }}
 <form method="POST" action="">
-    <textarea name="code" rows="6" cols="50">{{ if .code }}{{ .code }}{{else}}return function(doc)
+    <textarea name="code" rows="4" cols="80">{{ if .code }}{{ .code }}{{else}}return function(doc)
   return true
 end{{ end }}</textarea>
     <p><button type="submit">Search</button></p>
 </form>
+<div>
     {{ range .docs }}
+	<div style="margin-bottom:30px;">
     <a href="/api/apps/admin/docstore/{{$.col}}?_id={{.doc._id}}">{{.doc._id}}</a>
+    {{ $cdoc := . }}
+    {{ if $.schema }}
+    {{ range $.schema }}
+    {{ $v := index $cdoc.doc .field_name }}
+
+    {{ if eq .field_type "STR" }}
+    {{ if $v }}<div>{{if .render_prefix}}{{ htmlify .render_prefix }}{{end}}{{ $v }}{{ if .render_suffix }}{{ htmlify .render_suffix }}{{ end }}</div>{{ end }}
+    {{ end }}
+
+    {{ if eq .field_type "MD" }}
+    {{ if $v }}<div>{{if .render_prefix}}{{ htmlify .render_prefix }}{{end}}{{ markdownify $v }}{{ if .render_suffix }}{{ htmlify .render_suffix }}{{ end }}</div>{{ end }}
+    {{ end }}
+
+    {{ end }}
+    <div style="text-align:right;">
+    <small>{{ .doc._updated }}</small>
+	</div>
+    {{ else }}
     <pre class="code"><code>{{.js}}</code></pre>
     {{ end }}
+	</div>
+    {{ end }}
+</div>
 
 {{ end }}
 

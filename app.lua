@@ -61,14 +61,43 @@ router:get('/docstore', function(params)
   app.response:write(template.render('docstore.html', 'layout.html', { collections = collections }))
 end)
 
+local schema = {
+  { field_name = "title", field_type = "STR", render_prefix = "<h4>", render_suffix = "</h4>" },
+  { field_name = "content", field_type = "MD", render_prefix = "<p>", render_suffix = "</p>" },
+}
+
 router:get('/docstore/:col', function(params)
   local col = docstore.col(params.col)
-  local docs, _, cursor  = col:query("", 100, function(doc) return true end)
+  local cdoc = {}
+  local cid = app.request:args():get("_id")
+  if cid ~= "" then
+    cdoc, _ = col:get(cid)
+  end
+  local docs, _, cursor  = col:query("", 100, function(doc) return true end, "dat={{.title}}")
   local jdocs = {}
   for _, d in ipairs(docs) do
     table.insert(jdocs, {doc=d, js=json.encode(d)})
   end
-  app.response:write(template.render('docstore.html', 'layout.html', { code = nil, col = params.col, collections = {}, docs = jdocs }))
+  app.response:write(template.render('docstore.html', 'layout.html', { cid = cid, cdoc = cdoc, schema = schema, code = nil, col = params.col, collections = {}, docs = jdocs }))
+end)
+
+router:post('/docstore/:col/new', function(params)
+  local col = docstore.col(params.col)
+  local f = app.request:form()
+  local dat = {}
+  for _, d in ipairs(schema) do
+    local v = f:get(d.field_name)
+    if f ~= nil then
+      dat[d.field_name] = v
+    end
+  end
+  if app.request:args():get("cid") == "" then
+    col:insert(dat)
+    app.response:redirect("/api/apps/admin/docstore/test")
+  else
+    col:update(app.request:args():get("cid"), dat) 
+    app.response:redirect("/api/apps/admin/docstore/test")
+  end
 end)
 
 router:post('/docstore/:col', function(params)
@@ -81,6 +110,7 @@ router:post('/docstore/:col', function(params)
   end
   app.response:write(template.render('docstore.html', 'layout.html', { code = code, col = params.col, collections = {}, docs = jdocs }))
 end)
+
 
 
 router:get('/git', function(params)

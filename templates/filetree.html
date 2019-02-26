@@ -32,8 +32,8 @@
     {{ range .node.children }}
     <tr>
         <td class="truncate" style="font-size:0.9em;"><a title="{{ .name }}" href="/api/apps/admin/filetree/{{ $.ref }}/{{ $.name }}/{{ .hash }}">{{ .name }}</a></td>
-        <td style="white-space:nowrap;font-size:0.9em;">{{ .mode }}</td>
-        <td style="white-space:nowrap;font-size:0.9em;">{{ .size_human }}</td>
+        <td style="white-space:nowrap;font-size:0.9em;">{{ .mode }}</td> 
+        <td style="white-space:nowrap;font-size:0.9em;">{{ if eq .type "file" }}{{ .size_human }}{{ else }}{{ len .children }}{{ end }}</td>
         <td style="font-size:0.9em;">{{ .mtime_short }}</td>
         <td>{{ if eq .type "file" }}<a href="{{ .dl_url }}">[dl]</a> <a href="{{ .url }}">[o]</a>{{ end }}</td>
     </tr>
