@@ -100,6 +100,12 @@ router:post('/docstore/:col/new', function(params)
   end
 end)
 
+router:post('/docstore/:col/remove', function(params)
+  local col = docstore.col(params.col)
+  col:remove(app.request:args():get("cid")) 
+  app.response:redirect("/api/apps/admin/docstore/test")
+end)
+
 router:post('/docstore/:col', function(params)
   local col = docstore.col(params.col)
   local code = app.request:form():get('code')

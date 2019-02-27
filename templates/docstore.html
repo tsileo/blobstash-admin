@@ -50,6 +50,7 @@ end{{ end }}</textarea>
     {{ range .docs }}
 	<div style="margin-bottom:30px;">
     <a href="/api/apps/admin/docstore/{{$.col}}?_id={{.doc._id}}">{{.doc._id}}</a>
+    <form method="POST" action="/api/apps/admin/docstore/{{$.col}}/remove?cid={{.doc._id}}"><input type="submit" class="no-button" value="remove"></form>
     {{ $cdoc := . }}
     {{ if $.schema }}
     {{ range $.schema }}
