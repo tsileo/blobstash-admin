@@ -57,28 +57,52 @@ router:get('/filetree/:ref/:name', function(params)
 end)
 
 router:get('/docstore', function(params)
-  local collections = { 'test' }
+  local collections = docstore.collections()
   app.response:write(template.render('docstore.html', 'layout.html', { collections = collections }))
 end)
 
 local schema = {
   { field_name = "title", field_type = "STR", render_prefix = "<h4>", render_suffix = "</h4>" },
-  { field_name = "content", field_type = "MD", render_prefix = "<p>", render_suffix = "</p>" },
+  { field_name = "content", field_type = "MD", render_prefix = "<div>", render_suffix = "</div>" },
 }
 
 router:get('/docstore/:col', function(params)
   local col = docstore.col(params.col)
   local cdoc = {}
-  local cid = app.request:args():get("_id")
+  local args = app.request:args()
+
+  -- check if a doc ID is requested for edit
+  local cid = args:get("_id")
   if cid ~= "" then
     cdoc, _ = col:get(cid)
   end
-  local docs, _, cursor  = col:query("", 100, function(doc) return true end, "dat={{.title}}")
+
+  -- default search func
+  local sf = function(doc) return true end
+
+  -- check if a text search is requested
+  local qs = args:get("qs")
+  if qs ~= "" then
+    -- compute the "text fields" on the fly for the text search
+    local tf = {}
+    for _, field in ipairs(schema) do
+      -- filter the STR|MD type
+      if field.field_type == "STR" or field.field_type == "MD" then
+        table.insert(tf, field.field_name)
+      end
+    end
+    -- setup the search function
+    sf = function(doc) return docstore.text_search(doc, qs, tf) end
+  end
+
+  -- do the query
+  local docs, _, cursor  = col:query("", 100, sf, "dat={{.title}}")
   local jdocs = {}
   for _, d in ipairs(docs) do
     table.insert(jdocs, {doc=d, js=json.encode(d)})
   end
-  app.response:write(template.render('docstore.html', 'layout.html', { cid = cid, cdoc = cdoc, schema = schema, code = nil, col = params.col, collections = {}, docs = jdocs }))
+
+  app.response:write(template.render('docstore.html', 'layout.html', { qs = qs, cid = cid, cdoc = cdoc, schema = schema, code = nil, col = params.col, collections = {}, docs = jdocs }))
 end)
 
 router:post('/docstore/:col/new', function(params)

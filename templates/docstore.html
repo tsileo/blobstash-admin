@@ -37,7 +37,7 @@
 <div><textarea placeholder="{{ .field_name }}" name="{{ .field_name }}" rows="6" cols="80">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
 {{ end }}
 {{ end }}
-<div><input type="submit" value="{{ if .cid }}Edit{{ else }}Create{{end}}"><div>
+<p><input type="submit" value="{{ if .cid }}Edit{{ else }}Create{{end}}"></p>
 </form>
 {{ end }}
 <form method="POST" action="">
@@ -46,6 +46,11 @@
 end{{ end }}</textarea>
     <p><button type="submit">Search</button></p>
 </form>
+<form method="GET" action="/api/apps/admin/docstore/{{$.col}}">
+	<div><input type="text" placeholder="search terms" name="qs" value="{{.qs}}"></div>
+    <p><button type="submit">Search</button>{{ if .qs }} <a href="/api/apps/admin/docstore/{{$.col}}">Reset search</a>{{ end }}</p>
+</form>
+
 <div>
     {{ range .docs }}
 	<div style="margin-bottom:30px;">
