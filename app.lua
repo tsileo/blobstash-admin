@@ -61,12 +61,15 @@ router:get('/docstore', function(params)
   app.response:write(template.render('docstore.html', 'layout.html', { collections = collections }))
 end)
 
-local schema = {
-  { field_name = "title", field_type = "STR", render_prefix = "<h4>", render_suffix = "</h4>" },
-  { field_name = "content", field_type = "MD", render_prefix = "<div>", render_suffix = "</div>" },
-}
 
 router:get('/docstore/:col', function(params)
+  local schema_name = ''
+  local admin_ext = docstore.get_ext(params.col, "admin")
+  local schema_ext = docstore.get_ext(params.col, "schema")
+  if schema_ext ~= nil then
+    schema_name = schema_ext.schema
+  end
+  local schema = docstore.get_schema(schema_name)
   local col = docstore.col(params.col)
   local cdoc = {}
   local args = app.request:args()
@@ -94,9 +97,13 @@ router:get('/docstore/:col', function(params)
     -- setup the search function
     sf = function(doc) return docstore.text_search(doc, qs, tf) end
   end
-
+  local sort_index = ''
+  if admin_ext ~= nil and admin_ext.default_sort_index ~= nil then
+    sort_index = admin_ext.default_sort_index
+  end
   -- do the query
-  local docs, _, cursor  = col:query("", 100, sf, "dat={{.title}}")
+  -- FIXME(tsileo): no more inline tpl
+  local docs, _, cursor  = col:query("", 100, sf, sort_index)
   local jdocs = {}
   for _, d in ipairs(docs) do
     table.insert(jdocs, {doc=d, js=json.encode(d)})
@@ -109,6 +116,13 @@ router:post('/docstore/:col/new', function(params)
   local col = docstore.col(params.col)
   local f = app.request:form()
   local dat = {}
+  local schema_name = ''
+  local admin_ext = docstore.get_ext(params.col, "admin")
+  local schema_ext = docstore.get_ext(params.col, "schema")
+  if schema_ext ~= nil then
+    schema_name = schema_ext.schema
+  end
+local schema = docstore.get_schema(schema_name)
   for _, d in ipairs(schema) do
     local v = f:get(d.field_name)
     if f ~= nil then
