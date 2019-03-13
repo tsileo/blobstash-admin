@@ -103,13 +103,13 @@ router:get('/docstore/:col', function(params)
   end
   -- do the query
   -- FIXME(tsileo): no more inline tpl
-  local docs, _, cursor  = col:query("", 100, sf, sort_index)
+  local docs, _, cursor, stats  = col:query("", 100, sf, sort_index)
   local jdocs = {}
   for _, d in ipairs(docs) do
-    table.insert(jdocs, {doc=d, js=json.encode(d)})
+    table.insert(jdocs, {doc=d, js=json.encode(d), stats = stats })
   end
 
-  app.response:write(template.render('docstore.html', 'layout.html', { qs = qs, cid = cid, cdoc = cdoc, schema = schema, code = nil, col = params.col, collections = {}, docs = jdocs }))
+  app.response:write(template.render('docstore.html', 'layout.html', { stats = stats, qs = qs, cid = cid, cdoc = cdoc, schema = schema, code = nil, col = params.col, collections = {}, docs = jdocs }))
 end)
 
 router:post('/docstore/:col/new', function(params)
@@ -122,37 +122,45 @@ router:post('/docstore/:col/new', function(params)
   if schema_ext ~= nil then
     schema_name = schema_ext.schema
   end
-local schema = docstore.get_schema(schema_name)
-  for _, d in ipairs(schema) do
-    local v = f:get(d.field_name)
-    if f ~= nil then
-      dat[d.field_name] = v
+  local schema = docstore.get_schema(schema_name)
+  if schema ~= nil then
+    for _, d in ipairs(schema) do
+      local v = f:get(d.field_name)
+      if f ~= nil then
+        dat[d.field_name] = v
+      end
+    end
+  else
+    local raw = f:get("raw")
+    if raw ~= "" then
+      dat = json.decode(raw)
     end
   end
+
   if app.request:args():get("cid") == "" then
     col:insert(dat)
-    app.response:redirect("/api/apps/admin/docstore/test")
+    app.response:redirect("/api/apps/admin/docstore/" .. params.col)
   else
     col:update(app.request:args():get("cid"), dat) 
-    app.response:redirect("/api/apps/admin/docstore/test")
+    app.response:redirect("/api/apps/admin/docstore/" .. params.col)
   end
 end)
 
 router:post('/docstore/:col/remove', function(params)
   local col = docstore.col(params.col)
   col:remove(app.request:args():get("cid")) 
-  app.response:redirect("/api/apps/admin/docstore/test")
+  app.response:redirect("/api/apps/admin/docstore/" .. params.col)
 end)
 
 router:post('/docstore/:col', function(params)
   local col = docstore.col(params.col)
   local code = app.request:form():get('code')
-  local docs, _, cursor  = col:query("", 100, code)
+  local docs, _, cursor, stats  = col:query("", 100, code)
   local jdocs = {}
   for _, d in ipairs(docs) do
     table.insert(jdocs, {doc=d, js=json.encode(d)})
   end
-  app.response:write(template.render('docstore.html', 'layout.html', { code = code, col = params.col, collections = {}, docs = jdocs }))
+  app.response:write(template.render('docstore.html', 'layout.html', { stats = stats, code = code, col = params.col, collections = {}, docs = jdocs }))
 end)
 
 

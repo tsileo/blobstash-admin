@@ -26,7 +26,7 @@
 {{ if .col }}
 <h3>{{ .col }}</h3>
 {{ if .schema }}
-<form method="POST" action="/api/apps/admin/docstore/test/new{{if .cid }}?cid={{.cid}}{{end}}">
+<form method="POST" action="/api/apps/admin/docstore/{{ .col }}/new{{if .cid }}?cid={{.cid}}{{end}}">
 {{ $idoc := .cdoc }}
 {{ range .schema }}
 {{ if eq .field_type "STR" }}
@@ -37,6 +37,11 @@
 <div><textarea placeholder="{{ .field_name }}" name="{{ .field_name }}" rows="6" cols="80">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
 {{ end }}
 {{ end }}
+<p><input type="submit" value="{{ if .cid }}Edit{{ else }}Create{{end}}"></p>
+</form>
+{{ else }}
+<form method="POST" action="/api/apps/admin/docstore/{{ .col }}/new{{if .cid }}?cid={{.cid}}{{end}}">
+<textarea name="raw" rows="6" cols="80">{{ if .raw }}{{ .raw }}{{ end }}</textarea>
 <p><input type="submit" value="{{ if .cid }}Edit{{ else }}Create{{end}}"></p>
 </form>
 {{ end }}
@@ -51,11 +56,41 @@ end{{ end }}</textarea>
     <p><button type="submit">Search</button>{{ if .qs }} <a href="/api/apps/admin/docstore/{{$.col}}">Reset search</a>{{ end }}</p>
 </form>
 
+<details style="margin-bottom:20px;">
+    <summary style="cursor:pointer;">query stats</summary>
+    <table class="table">
+        <tr>
+            <td>engine<td>
+            <td><strong>{{.stats.engine}}</strong></td>
+        </tr>
+        <tr>
+            <td>index<td>
+            <td><strong>{{.stats.index}}</strong></td>
+        </tr>
+        <tr>
+            <td>docs_examined<td>
+            <td><strong>{{.stats.docs_examined}}</strong></td>
+        </tr>
+        <tr>
+            <td>docs_returned<td>
+            <td><strong>{{.stats.docs_returned}}</strong></td>
+        </tr>
+        <tr>
+            <td>cursor<td>
+            <td><code>{{.stats.cursor}}</code></td>
+        </tr>
+        <tr>
+            <td>exec_time_ms<td>
+            <td><strong>{{.stats.exec_time_ms}}</strong></td>
+        </tr>
+    </table>
+
+</details>
+
+
 <div>
     {{ range .docs }}
-	<div style="margin-bottom:30px;">
-    <a href="/api/apps/admin/docstore/{{$.col}}?_id={{.doc._id}}">{{.doc._id}}</a>
-    <form method="POST" action="/api/apps/admin/docstore/{{$.col}}/remove?cid={{.doc._id}}"><input type="submit" class="no-button" value="remove"></form>
+	<div style="margin-bottom:30px;border-top:1px dashed #ccc;padding-top:20px;">
     {{ $cdoc := . }}
     {{ if $.schema }}
     {{ range $.schema }}
@@ -71,7 +106,10 @@ end{{ end }}</textarea>
 
     {{ end }}
     <div style="text-align:right;">
-    <small>{{ .doc._updated }}</small>
+    <a href="/api/apps/admin/docstore/{{$.col}}?_id={{.doc._id}}" style="font-size:0.9em;padding-top:2px;float:right;padding-left:10px;color:#444;text-decoration:underline;">edit</a>
+    <form method="POST" action="/api/apps/admin/docstore/{{$.col}}/remove?cid={{.doc._id}}"><input type="submit" class="no-button" value="remove"></form>
+        <div><small>{{ .doc._id }}</small></div>
+        <small>{{ .doc._updated }}</small>
 	</div>
     {{ else }}
     <pre class="code"><code>{{.js}}</code></pre>
