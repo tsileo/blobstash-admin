@@ -42,8 +42,16 @@
 </table>
 {{ else }}
 
+{{ if .node.is_image }}
+
+<div style="margin:30px auto;">
+<img src="{{ .node.url }}&w=640" />
+</div>
+
+{{ end }}
+
 {{ if .node.is_video }}
-m<div style="margin:30px auto;">
+<div style="margin:30px auto;">
 <video controls poster="{{ .node.webm_poster_url }}">
 <source src="{{ .node.webm_url }}" type="video/webm">
 Sorry, your browser doesn't support embedded videos.
@@ -72,6 +80,13 @@ Sorry, your browser doesn't support embedded videos.
 
 <dt>format</dt>
 <dd>{{ .node.video_width }} x {{ .node.video_height }}</dd>
+
+{{ end }}
+
+{{ if .node.is_image }}
+
+<dt>size</dt>
+<dd>{{ .node.image_width }} x {{ .node.image_height }}</dd>
 
 {{ end }}
 
