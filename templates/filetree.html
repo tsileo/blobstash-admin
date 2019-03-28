@@ -45,7 +45,7 @@
 {{ if .node.is_image }}
 
 <div style="margin:30px auto;">
-<img src="{{ .node.url }}&w=640" />
+    <img src="{{ .node.url }}{{ if gt .node.image_width 640.0 }}&w=640{{ end }}" />
 </div>
 
 {{ end }}
