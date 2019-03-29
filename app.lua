@@ -42,6 +42,12 @@ router:get('/filetree', function(params)
   app.response:write(template.render('filetree.html', 'layout.html', { data = data }))
 end)
 
+router:get('/filetree/versions/:name', function(params)
+  local versions = ft.fs_versions(params.name)
+  app.response:write(template.render('filetree.html', 'layout.html', { name = params.name, versions = versions }))
+end)
+
+
 router:get('/filetree/:ref/:name/:cref', function(params)
   local node, path = ft.node(params.ref, params.cref)
   if node.name == '_root' then
