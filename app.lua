@@ -7,9 +7,10 @@ local ft = require('filetree')
 local bs = require('blobstore')
 local docstore = require('docstore')
 local apps = require('apps')
+local _blobstash = require('_blobstash')
 
 router:get('/', function(params)
-  app.response:write(template.render('index.html', 'layout.html', {}))
+  app.response:write(template.render('index.html', 'layout.html', { status = _blobstash.status() }))
 end)
 
 router:get('/apps', function(params)

@@ -1,3 +1,4 @@
+{{ define "root"}}active{{ end }}
 {{ define "docstore-menu" }}{{ end }}
 {{ define "git-menu" }}{{ end }}
 {{ define "filetree-menu" }}{{ end }}
@@ -5,3 +6,32 @@
 {{ define "kvstore-menu" }}{{ end }}
 {{ define "head" }}{{ end }}
 {{ define "main" }}{{ end }}
+
+{{ define "main" }}
+<h4>Status</h4>
+{{ $blobs := index .status "blobstore" }}
+<h5 style="margin-top:30px;">BlobStore</h5>
+<table class="table table-striped table-hover">
+  <tbody>
+        {{ range $key, $value := $blobs }}
+    <tr>
+        <td>{{ $key }}</td>
+        <td>{{ $value }}</td>
+    </tr>
+		{{ end }}
+  </tbody>
+</table>
+
+<h5 style="margin-top:30px;">S3</h5>
+{{ $s3 := index .status "s3" }}
+<table class="table table-striped table-hover">
+  <tbody>
+        {{ range $key, $value := $s3 }}
+    <tr>
+        <td>{{ $key }}</td>
+        <td>{{ $value }}</td>
+    </tr>
+		{{ end }}
+  </tbody>
+</table>
+{{ end }}

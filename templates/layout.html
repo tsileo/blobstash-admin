@@ -1,3 +1,10 @@
+{{ define "root" }}{{ end }}
+{{ define "docstore-menu" }}{{ end }}
+{{ define "git-menu" }}{{ end }}
+{{ define "filetree-menu" }}{{ end }}
+{{ define "blobstore-menu" }}{{ end }}
+{{ define "kvstore-menu" }}{{ end }}
+{{ define "head" }}{{ end }}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -42,7 +49,7 @@ width:400px;
     <div class="column col-2" style="height:100vh;">
 
 <ul class="nav">
-  <li class="nav-item">
+  <li class="nav-item {{ template "root" . }}">
     <a href="/api/apps/admin" style="text-transform:uppercase">BlobStash</a>
   </li>
   <li class="nav-item {{ template "blobstore-menu" . }}">
