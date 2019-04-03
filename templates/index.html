@@ -15,7 +15,7 @@
   <tbody>
         {{ range $key, $value := $blobs }}
     <tr>
-        <td>{{ $key }}</td>
+        <td style="width:80%">{{ $key }}</td>
         <td>{{ $value }}</td>
     </tr>
 		{{ end }}
@@ -28,7 +28,7 @@
   <tbody>
         {{ range $key, $value := $s3 }}
     <tr>
-        <td>{{ $key }}</td>
+        <td style="width:80%">{{ $key }}</td>
         <td>{{ $value }}</td>
     </tr>
 		{{ end }}
