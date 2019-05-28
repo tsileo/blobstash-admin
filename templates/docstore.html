@@ -30,14 +30,14 @@
 {{ $idoc := .cdoc }}
 {{ range .schema }}
 {{ if eq .field_type "STR" }}
-<div><input placeholder="{{.field_name}}" style="width:100%;" type="text" name="{{ .field_name }}" {{ if $idoc }}value="{{index $idoc .field_name}}"{{end}}></div>
+<div><input placeholder="{{.field_name}}" id="str-{{.field_name}}" style="width:100%;" type="text" name="{{ .field_name }}" {{ if $idoc }}value="{{index $idoc .field_name}}"{{end}}></div>
 {{ else if eq .field_type "TXT" }}
 <div><textarea placeholder="{{.field_name}}" id="txt-{{.field_name}}" name="{{ .field_name }}" cols="80" rows="4">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
 {{ else if eq .field_type "MD" }}
 <div><textarea placeholder="{{ .field_name }}" id="md-{{.field_name}}" name="{{ .field_name }}" rows="6" cols="80">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
 {{ end }}
 {{ end }}
-<p><input type="submit" value="{{ if .cid }}Edit{{ else }}Create{{end}}"></p>
+<p><input type="submit" id="submit-vim" value="{{ if .cid }}Edit{{ else }}Create{{end}}"></p>
 </form>
 {{ else }}
 <form method="POST" action="/api/apps/admin/docstore/{{ .col }}/new{{if .cid }}?cid={{.cid}}{{end}}">
@@ -46,8 +46,8 @@
 </form>
 {{ end }}
 <form method="GET" action="/api/apps/admin/docstore/{{$.col}}">
-	<div><input type="text" placeholder="search terms" name="qs" value="{{.qs}}"></div>
-    <p><button type="submit">Search</button>{{ if .qs }} <a href="/api/apps/admin/docstore/{{$.col}}">Reset search</a>{{ end }}</p>
+	<div><input type="text" placeholder="search terms" id="qs" name="qs" value="{{.qs}}"></div>
+    <p><button type="submit">Search</button>{{ if .qs }} <a id="reset-search" href="/api/apps/admin/docstore/{{$.col}}">Reset search</a>{{ end }}</p>
 </form>
 
 <details style="margin-bottom:20px;">
@@ -136,8 +136,30 @@ let keyConf = {
   "F11": function(cm) {
     cm.setOption("fullScreen", !cm.getOption("fullScreen"));
   },
+  "F2": function(cm) {
+    CodeMirror.commands.save(cm);
+  },
 }
 let myTextArea2 = document.getElementById("md-content");
 var myCodeMirror2 = CodeMirror.fromTextArea(myTextArea2, {mode: "markdown", keyMap: "vim",  extraKeys: keyConf});
+var inputKey = function(k, id) {
+  hotkeys(k, function(event, handler){
+    // Prevent the default refresh event under WINDOWS system
+    event.preventDefault();
+    document.getElementById(id).focus();
+  })
+}
+inputKey("t", "str-title");
+inputKey("s", "qs"); 
+hotkeys("c", function(evnet, handler) { event.preventDefault(); myCodeMirror2.focus(); });
+CodeMirror.commands.save = function () {
+  console.log("Saving");
+  document.getElementById("submit-vim").click();
+};
+hotkeys("ctrl+c", function(event, handler) { event.preventDefault();
+  event.preventDefault();
+  document.getElementById("reset-search").click();
+  document.activeElement.blur();
+});
 </script>
 {{ end }}
