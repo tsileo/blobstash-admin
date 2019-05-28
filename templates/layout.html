@@ -1,3 +1,4 @@
+{{ define "js" }}{{ end }}
 {{ define "root" }}{{ end }}
 {{ define "docstore-menu" }}{{ end }}
 {{ define "git-menu" }}{{ end }}
@@ -11,6 +12,7 @@
     <meta charset="utf-8">
     <title>Admin - BlobStash</title>
     <link rel="stylesheet" href="https://unpkg.com/spectre.css/dist/spectre.min.css">
+	<link rel="stylesheet" href="https://unpkg.com/highlight.js@9.12.0/styles/solarized-light.css">
     {{ template "head" . }}
 
 <style>
@@ -38,6 +40,15 @@ width:400px;
      text-decoration:underline;
      cursor:pointer;
      font-size: 0.9em;
+}
+.sparkline svg {
+  stroke-width: 0px;
+}
+.sparkline-filled svg {
+  fill: rgba(60,179,113,0.25);
+}
+textarea, input {
+  font-family: monospace;
 }
 </style>
 
@@ -84,6 +95,8 @@ width:400px;
 	</div>
 </div>
 </div>
-
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+  {{ template "js" . }}
   </body>
 </html>

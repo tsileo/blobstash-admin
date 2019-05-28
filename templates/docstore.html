@@ -1,4 +1,9 @@
 {{ define "docstore-menu" }}active{{ end }}
+{{ define "head" }}
+<link rel="stylesheet" href="https://unpkg.com/codemirror@5.47.0/lib/codemirror.css">
+<link rel="stylehseet" href="https://unpkg.com/codemirror@5.47.0/theme/solarized.css">
+<link rel="stylesheet" href="https://unpkg.com/codemirror@5.47.0/addon/display/fullscreen.css">
+{{ end }}
 {{ define "main" }}
 
 {{ if .collections }}
@@ -25,11 +30,11 @@
 {{ $idoc := .cdoc }}
 {{ range .schema }}
 {{ if eq .field_type "STR" }}
-<div><input placeholder="{{.field_name}}" type="text" name="{{ .field_name }}" {{ if $idoc }}value="{{index $idoc .field_name}}"{{end}}></div>
+<div><input placeholder="{{.field_name}}" style="width:100%;" type="text" name="{{ .field_name }}" {{ if $idoc }}value="{{index $idoc .field_name}}"{{end}}></div>
 {{ else if eq .field_type "TXT" }}
-<div><textarea placeholder="{{.field_name}}" name="{{ .field_name }}">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
+<div><textarea placeholder="{{.field_name}}" id="txt-{{.field_name}}" name="{{ .field_name }}" cols="80" rows="4">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
 {{ else if eq .field_type "MD" }}
-<div><textarea placeholder="{{ .field_name }}" name="{{ .field_name }}" rows="6" cols="80">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
+<div><textarea placeholder="{{ .field_name }}" id="md-{{.field_name}}" name="{{ .field_name }}" rows="6" cols="80">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
 {{ end }}
 {{ end }}
 <p><input type="submit" value="{{ if .cid }}Edit{{ else }}Create{{end}}"></p>
@@ -40,17 +45,20 @@
 <p><input type="submit" value="{{ if .cid }}Edit{{ else }}Create{{end}}"></p>
 </form>
 {{ end }}
+<form method="GET" action="/api/apps/admin/docstore/{{$.col}}">
+	<div><input type="text" placeholder="search terms" name="qs" value="{{.qs}}"></div>
+    <p><button type="submit">Search</button>{{ if .qs }} <a href="/api/apps/admin/docstore/{{$.col}}">Reset search</a>{{ end }}</p>
+</form>
+
+<details style="margin-bottom:20px;">
+    <summary style="cursor:pointer;">Lua search</summary>
 <form method="POST" action="">
     <textarea name="code" rows="4" cols="80">{{ if .code }}{{ .code }}{{else}}return function(doc)
   return true
 end{{ end }}</textarea>
     <p><button type="submit">Search</button></p>
 </form>
-<form method="GET" action="/api/apps/admin/docstore/{{$.col}}">
-	<div><input type="text" placeholder="search terms" name="qs" value="{{.qs}}"></div>
-    <p><button type="submit">Search</button>{{ if .qs }} <a href="/api/apps/admin/docstore/{{$.col}}">Reset search</a>{{ end }}</p>
-</form>
-
+</details>
 <details style="margin-bottom:20px;">
     <summary style="cursor:pointer;">query stats</summary>
     <table class="table">
@@ -96,15 +104,14 @@ end{{ end }}</textarea>
     {{ end }}
 
     {{ if eq .field_type "MD" }}
-    {{ if $v }}<div>{{if .render_prefix}}{{ htmlify .render_prefix }}{{end}}{{ markdownify $v }}{{ if .render_suffix }}{{ htmlify .render_suffix }}{{ end }}</div>{{ end }}
+    {{ if $v }}<div>{{if .render_prefix}}{{ htmlify .render_prefix }}{{end}}{{ markdownify $v }} {{ if .render_suffix }}{{ htmlify .render_suffix }}{{ end }}</div>{{ end }}
     {{ end }}
 
     {{ end }}
     <div style="text-align:right;">
     <a href="/api/apps/admin/docstore/{{$.col}}?_id={{.doc._id}}" style="font-size:0.9em;padding-top:2px;float:right;padding-left:10px;color:#444;text-decoration:underline;">edit</a>
-    <form method="POST" action="/api/apps/admin/docstore/{{$.col}}/remove?cid={{.doc._id}}"><input type="submit" class="no-button" value="remove"></form>
-        <div><small>{{ .doc._id }}</small></div>
-        <small>{{ .doc._updated }}</small>
+    <form method="POST" action="/api/apps/admin/docstore/{{$.col}}/remove?cid={{.doc._id}}" style="display:inline;"><input type="submit" class="no-button" value="remove"></form>
+    <small>{{ .doc._id }}</small> | <small>{{ .doc._updated }}</small>
 	</div>
     {{ else }}
     <pre class="code"><code>{{.js}}</code></pre>
@@ -115,4 +122,22 @@ end{{ end }}</textarea>
 
 {{ end }}
 
+
+{{ end }}
+
+{{ define "js" }}
+<script src="https://unpkg.com/codemirror@5.47.0/lib/codemirror.js"></script>
+<script src="https://unpkg.com/codemirror@5.47.0/mode/lua/lua.js"></script>
+<script src="https://unpkg.com/codemirror@5.47.0/mode/markdown/markdown.js"></script>
+<script src="https://unpkg.com/codemirror@5.47.0/keymap/vim.js"></script>
+<script src="https://unpkg.com/codemirror@5.47.0/addon/display/fullscreen.js"></script>
+<script>
+let keyConf = {
+  "F11": function(cm) {
+    cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+  },
+}
+let myTextArea2 = document.getElementById("md-content");
+var myCodeMirror2 = CodeMirror.fromTextArea(myTextArea2, {mode: "markdown", keyMap: "vim",  extraKeys: keyConf});
+</script>
 {{ end }}
