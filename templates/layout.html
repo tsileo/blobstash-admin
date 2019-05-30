@@ -16,6 +16,9 @@
     {{ template "head" . }}
 
 <style>
+.cm-s-solarized.CodeMirror {
+box-shadow: none;
+}
   dt {
     float: left;
     clear: left;
@@ -98,6 +101,7 @@ textarea, input {
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 	<script>hljs.initHighlightingOnLoad();</script>
     <script src="https://unpkg.com/hotkeys-js@3.6.11/dist/hotkeys.min.js"></script>
+    <script src="https://unpkg.com/clipboard@2.0.4/dist/clipboard.min.js"></script>
   {{ template "js" . }}
   </body>
 </html>
