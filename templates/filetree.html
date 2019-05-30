@@ -17,6 +17,13 @@
 {{ .node.name }}
 
 {{ if .node }}
+
+<form action="/api/apps/admin/filetree/upload?ref={{.ref}}&name={{.name}}&path={{.spath}}" method="post" enctype="multipart/form-data">
+<input type="file" name="file">
+<button type="submit">upload</button>
+</form>
+
+
 {{ if eq .node.type "dir" }}
 <table class="table table-striped table-hover">
   <thead>

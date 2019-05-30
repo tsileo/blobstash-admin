@@ -48,26 +48,42 @@ router:get('/filetree/versions/:name', function(params)
   app.response:write(template.render('filetree.html', 'layout.html', { name = params.name, versions = versions }))
 end)
 
-
 router:get('/filetree/:ref/:name/:cref', function(params)
-  local node, path = ft.node(params.ref, params.cref)
+  local node, path, spath = ft.node(params.ref, params.cref)
   if node.name == '_root' then
       node.name = name
   end
-  app.response:write(template.render('filetree.html', 'layout.html', { ref = params.ref, name = params.name, node = node, path = path }))
+  app.response:write(template.render('filetree.html', 'layout.html', { ref = params.ref, name = params.name, node = node, path = path, spath = spath }))
 end)
 
 router:get('/filetree/:ref/:name', function(params)
   local root = ft.fs(params.ref)
   root.name = params.name
-  app.response:write(template.render('filetree.html', 'layout.html', { ref = params.ref, name = params.name, node = root }))
+  app.response:write(template.render('filetree.html', 'layout.html', { ref = params.ref, name = params.name, node = root, spath = "/"  }))
 end)
+
+router:post('/filetree/upload', function (params)
+  local f = app.request:file('file')
+  local form = app.request:args()
+  local ref = form:get('ref')
+  local name = form:get('name')
+  local path = form:get('path')
+  local new_parent, _ = ft.put_file_at(f.filename, f.contents, name, path)
+  if path == "/" then
+    app.response:redirect("/api/apps/admin/filetree/" .. new_parent .. "/" .. name) --  .. "/" .. new_cref.ref)
+
+  else
+    local new_root = ft.fs_by_name(name)
+    app.response:redirect("/api/apps/admin/filetree/" .. new_root.hash .. "/" .. name  .. "/" .. new_parent)
+  end
+  --app.response:write(template.render('filetree.html', 'layout.html', { ref = params.ref, name = params.name, node = root }))
+end)
+
 
 router:get('/docstore', function(params)
   local collections = docstore.collections()
   app.response:write(template.render('docstore.html', 'layout.html', { collections = collections }))
 end)
-
 
 router:get('/docstore/:col', function(params)
   local schema_name = ''
