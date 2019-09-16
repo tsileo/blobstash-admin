@@ -18,13 +18,25 @@
 
 {{ if .node }}
 
+{{ if eq .node.type "dir" }}
+
+<div style="margin:20px 0">
+<details>
+    <summary>Actions</summary>
+
+
 <form action="/api/apps/admin/filetree/upload?ref={{.ref}}&name={{.name}}&path={{.spath}}" method="post" enctype="multipart/form-data">
 <input type="file" name="file">
 <button type="submit">upload</button>
 </form>
 
+<form action="/api/apps/admin/filetree/mkdir?ref={{.ref}}&name={{.name}}&path={{.spath}}" method="post" enctype="multipart/form-data">
+<input type="text" name="newdir">
+<button type="submit">mkdir</button>
+</form>
+</details>
+</div>
 
-{{ if eq .node.type "dir" }}
 <table class="table table-striped table-hover">
   <thead>
     <tr>

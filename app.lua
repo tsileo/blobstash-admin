@@ -126,7 +126,7 @@ router:get('/docstore/:col', function(params)
   end
   -- do the query
   -- FIXME(tsileo): no more inline tpl
-  local docs, _, cursor, stats  = col:query("", 100, sf, sort_index)
+  local docs, _, cursor, stats  = col:query(args:get("cursor"), 100, sf, sort_index)
   local jdocs = {}
   for _, d in ipairs(docs) do
     table.insert(jdocs, {doc=d, js=json.encode(d), stats = stats })

@@ -111,7 +111,7 @@ end{{ end }}</textarea>
     {{ end }}
     <div style="text-align:right;">
     <a href="/api/apps/admin/docstore/{{$.col}}?_id={{.doc._id}}" style="font-size:0.9em;padding-top:2px;float:right;padding-left:10px;color:#444;text-decoration:underline;" class="edit-link">edit</a>
-    <form method="POST" action="/api/apps/admin/docstore/{{$.col}}/remove?cid={{.doc._id}}" style="display:inline;"><input type="submit" class="no-button" value="remove"></form>
+    <form method="POST" action="/api/apps/admin/docstore/{{$.col}}/remove?cid={{.doc._id}}" style="display:inline;" onsubmit="return confirm('Confirm note deletion?');"><input type="submit" class="no-button" value="remove"></form>
     <small>{{ .doc._id }}</small> | <small>{{ .doc._updated }}</small>
 	</div>
     {{ else }}
@@ -120,6 +120,11 @@ end{{ end }}</textarea>
 	</div>
     {{ end }}
 </div>
+
+<p>{{ .stats.docs_returned }} results.</p>
+{{ if eq .stats.docs_returned 100.0 }}
+<a href="/api/apps/admin/docstore/{{.col}}?cursor={{.stats.cursor}}&qs={{.qs}}">Next</a>
+{{ end }}
 
 {{ end }}
 
