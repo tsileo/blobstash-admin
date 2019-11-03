@@ -87,6 +87,18 @@ router:post('/filetree/upload', function (params)
   --app.response:write(template.render('filetree.html', 'layout.html', { ref = params.ref, name = params.name, node = root }))
 end)
 
+router:post('/filetree/mkdir', function (params)
+  local f = app.request:form()
+  local newdir = f:get('newdir')
+  local args = app.request:args()
+  local ref = args:get('ref')
+  local name = args:get('name')
+  local path = args:get('path')
+  local newref = ft.mkdir(name, path, newdir)
+  local new_root = ft.fs_by_name(name)
+  app.response:redirect("/api/apps/admin/filetree/" .. new_root.hash .. "/" .. name .. "/" .. newref)
+end)
+
 
 router:get('/docstore', function(params)
   local collections = docstore.collections()
