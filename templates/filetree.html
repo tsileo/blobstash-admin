@@ -148,6 +148,12 @@ Sorry, your browser doesn't support embedded videos.
 
 
 {{ if .data }}
+
+<form action="/api/apps/admin/filetree" method="post">
+<input type="text" name="name">
+<button type="submit">new tree</button>
+</form>
+
 <table class="table table-striped table-hover">
   <thead>
     <tr>

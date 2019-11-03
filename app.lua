@@ -43,6 +43,14 @@ router:get('/filetree', function(params)
   app.response:write(template.render('filetree.html', 'layout.html', { data = data }))
 end)
 
+router:post('/filetree', function(params)
+  local form = app.request:form()
+  ft.create_fs(form:get('name'))
+  local data = ft.iter_fs()
+  app.response:write(template.render('filetree.html', 'layout.html', { data = data }))
+
+end)
+
 router:get('/filetree/versions/:name', function(params)
   local versions = ft.fs_versions(params.name)
   app.response:write(template.render('filetree.html', 'layout.html', { name = params.name, versions = versions }))
