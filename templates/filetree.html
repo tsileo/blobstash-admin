@@ -114,7 +114,11 @@ Sorry, your browser doesn't support embedded videos.
 
 </dl>
 
-
+{{ if .node.contents }}
+<div style="margin-top: 30px;">
+<pre class="code"><code>{{ .node.contents }}</code></pre>
+</div>
+{{ end }}
 
 {{ end }}
 {{ end }}
@@ -151,7 +155,7 @@ Sorry, your browser doesn't support embedded videos.
 
 <form action="/api/apps/admin/filetree" method="post">
 <input type="text" name="name">
-<button type="submit">new tree</button>
+<button type="submit">new FS</button>
 </form>
 
 <table class="table table-striped table-hover">
