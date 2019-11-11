@@ -41,6 +41,7 @@
   <thead>
     <tr>
       <th>Name</th>
+      <th>Type</th>
       <th>Mode</th>
       <th>Size</th>
       <th>ModTime</th>
@@ -51,6 +52,8 @@
     {{ range .node.children }}
     <tr>
         <td class="truncate" style="font-size:0.9em;"><a title="{{ .name }}" href="/api/apps/admin/filetree/{{ $.ref }}/{{ $.name }}/{{ .hash }}">{{ .name }}</a></td>
+      
+        <td style="white-space:nowrap;font-size:0.9em;">{{ if eq .type "file" }}{{ .file_type }}{{ else }}folder{{end}}</td> 
         <td style="white-space:nowrap;font-size:0.9em;">{{ .mode }}</td> 
         <td style="white-space:nowrap;font-size:0.9em;">{{ if eq .type "file" }}{{ .size_human }}{{ else }}{{ .children_count }} items{{ end }}</td>
         <td style="font-size:0.9em;">{{ .mtime_short }}</td>
@@ -70,8 +73,8 @@
 {{ end }}
 
 {{ if .node.is_video }}
-<div style="margin:30px auto;">
-<video controls poster="{{ .node.webm_poster_url }}">
+<div style="margin:30px auto;max-width:720px;height:480px;">
+<video controls poster="{{ .node.webm_poster_url }}" width="720" height="480">
 <source src="{{ .node.webm_url }}" type="video/webm">
 Sorry, your browser doesn't support embedded videos.
 </video>
@@ -151,8 +154,6 @@ Sorry, your browser doesn't support embedded videos.
 {{ end }}
 
 
-{{ if .data }}
-
 <form action="/api/apps/admin/filetree" method="post">
 <input type="text" name="name">
 <button type="submit">new FS</button>
@@ -177,7 +178,6 @@ Sorry, your browser doesn't support embedded videos.
     {{ end }}
   </tbody>
 </table>
-{{ end }}
 
 
 {{ end }}

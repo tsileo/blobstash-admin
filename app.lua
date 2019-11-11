@@ -8,6 +8,7 @@ local bs = require('blobstore')
 local docstore = require('docstore')
 local apps = require('apps')
 local _blobstash = require('_blobstash')
+local user_agent = "Admin UI"
 
 router:get('/', function(params)
   app.response:write(template.render('index.html', 'layout.html', { status = _blobstash.status() }))
@@ -76,7 +77,7 @@ router:post('/filetree/upload', function (params)
   local ref = form:get('ref')
   local name = form:get('name')
   local path = form:get('path')
-  local new_parent, _ = ft.put_file_at(f.filename, f.contents, name, path)
+  local new_parent, _ = ft.put_file_at({user_agent = user_agent, message = "Uploaded " .. f.filename .. " from the admin UI"}, f.filename, f.contents, name, path)
   if path == "/" then
     app.response:redirect("/api/apps/admin/filetree/" .. new_parent .. "/" .. name) --  .. "/" .. new_cref.ref)
 
