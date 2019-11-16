@@ -41,14 +41,14 @@ end)
 
 router:get('/filetree', function(params)
   local data = ft.iter_fs()
-  app.response:write(template.render('filetree.html', 'layout.html', { data = data }))
+  app.response:write(template.render('filetree.html', 'layout.html', { data = data, is_index = true }))
 end)
 
 router:post('/filetree', function(params)
   local form = app.request:form()
   ft.create_fs(form:get('name'))
   local data = ft.iter_fs()
-  app.response:write(template.render('filetree.html', 'layout.html', { data = data }))
+  app.response:write(template.render('filetree.html', 'layout.html', { data = data, is_index = true }))
 
 end)
 

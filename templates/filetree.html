@@ -88,7 +88,10 @@ Sorry, your browser doesn't support embedded videos.
 <dt>size</dt>
 <dd>{{ .node.size_human }}</dd>
 
-<dt>modetime</dt>
+<dt>mode</dt>
+<dd>{{ .node.mode }}</dd>
+
+<dt>modtime</dt>
 <dd>{{ .node.mtime }}</dd>
 
 {{ if .node.is_video }}
@@ -112,8 +115,13 @@ Sorry, your browser doesn't support embedded videos.
 
 {{ end }}
 
-<dt>hash</dt>
+<dt>ref</dt>
 <dd><code>{{ .node.hash }}</code></dd>
+
+<dt>actions</dt>
+<dd><a href="{{ .node.dl_url }}">[dl]</a> <a href="{{ .node.url }}">[o]</a>
+{{ if .node.is_video }}<a href="{{ .node.webm_url }}&dl=1">[webm]</a>{{ end }}
+</dd>
 
 </dl>
 
@@ -154,6 +162,8 @@ Sorry, your browser doesn't support embedded videos.
 {{ end }}
 
 
+{{ if .is_index }}
+
 <form action="/api/apps/admin/filetree" method="post">
 <input type="text" name="name">
 <button type="submit">new FS</button>
@@ -179,5 +189,6 @@ Sorry, your browser doesn't support embedded videos.
   </tbody>
 </table>
 
+{{ end }}
 
 {{ end }}
