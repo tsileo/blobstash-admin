@@ -1,4 +1,5 @@
 local template = require('template')
+local extra = require('extra')
 local json = require('json')
 local router = require('router').new()
 local gs = require('gitserver')
@@ -107,13 +108,6 @@ router:get('/docstore', function(params)
 end)
 
 router:get('/docstore/:col', function(params)
-  local schema_name = ''
-  local admin_ext = docstore.get_ext(params.col, "admin")
-  local schema_ext = docstore.get_ext(params.col, "schema")
-  if schema_ext ~= nil then
-    schema_name = schema_ext.schema
-  end
-  local schema = docstore.get_schema(schema_name)
   local col = docstore.col(params.col)
   local cdoc = {}
   local args = app.request:args()
@@ -129,31 +123,20 @@ router:get('/docstore/:col', function(params)
 
   -- check if a text search is requested
   local qs = args:get("qs")
-  if qs ~= "" then
-    -- compute the "text fields" on the fly for the text search
-    local tf = {}
-    for _, field in ipairs(schema) do
-      -- filter the STR|MD type
-      if field.field_type == "STR" or field.field_type == "MD" then
-        table.insert(tf, field.field_name)
-      end
-    end
-    -- setup the search function
-    sf = function(doc) return docstore.text_search(doc, qs, tf) end
-  end
+  -- sf = function(doc) return docstore.text_search(doc, qs, tf) end
   local sort_index = ''
   if admin_ext ~= nil and admin_ext.default_sort_index ~= nil then
     sort_index = admin_ext.default_sort_index
   end
   -- do the query
   -- FIXME(tsileo): no more inline tpl
-  local docs, _, cursor, stats  = col:query(args:get("cursor"), 100, sf, sort_index)
+  local docs, pointers, cursor, stats  = col:query(args:get("cursor"), 100, sf, sort_index)
   local jdocs = {}
   for _, d in ipairs(docs) do
     table.insert(jdocs, {doc=d, js=json.encode(d), stats = stats })
   end
 
-  app.response:write(template.render('docstore.html', 'layout.html', { stats = stats, qs = qs, cid = cid, cdoc = cdoc, schema = schema, code = nil, col = params.col, collections = {}, docs = jdocs }))
+  app.response:write(template.render('docstore.html', 'layout.html', { stats = stats, qs = qs, cid = cid, cdoc = cdoc, code = nil, col = params.col, collections = {}, docs = jdocs }))
 end)
 
 router:post('/docstore/:col/new', function(params)

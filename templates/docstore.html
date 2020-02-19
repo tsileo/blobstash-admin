@@ -26,29 +26,10 @@
 
 {{ if .col }}
 <h3>{{ .col }}</h3>
-{{ if .schema }}
-<form method="POST" action="/api/apps/admin/docstore/{{ .col }}/new{{if .cid }}?cid={{.cid}}{{end}}">
-{{ $idoc := .cdoc }}
-{{ range .schema }}
-{{ if eq .field_type "STR" }}
-<div><input placeholder="{{.field_name}}" id="str-{{.field_name}}" style="width:100%;border:0;" class="hljs" type="text" name="{{ .field_name }}" {{ if $idoc }}value="{{index $idoc .field_name}}"{{end}}></div>
-{{ else if eq .field_type "TXT" }}
-<div><textarea placeholder="{{.field_name}}" id="txt-{{.field_name}}" name="{{ .field_name }}" cols="80" rows="4">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
-{{ else if eq .field_type "MD" }}
-<div><textarea placeholder="{{ .field_name }}" id="md-{{.field_name}}" name="{{ .field_name }}" rows="6" cols="80">{{ if $idoc }}{{index $idoc .field_name}}{{end}}</textarea></div>
-{{ end }}
-{{ end }}
-<p><input type="submit" id="submit-vim" value="{{ if .cid }}Edit{{ else }}Create{{end}}"></p>
-</form>
-{{ else }}
+
 <form method="POST" action="/api/apps/admin/docstore/{{ .col }}/new{{if .cid }}?cid={{.cid}}{{end}}">
 <textarea name="raw" rows="6" cols="80">{{ if .raw }}{{ .raw }}{{ end }}</textarea>
 <p><input type="submit" value="{{ if .cid }}Edit{{ else }}Create{{end}}"></p>
-</form>
-{{ end }}
-<form method="GET" action="/api/apps/admin/docstore/{{$.col}}">
-	<div><input type="text" placeholder="search terms" id="qs" name="qs" value="{{.qs}}"></div>
-    <p><button type="submit">Search</button>{{ if .qs }} <a id="reset-search" href="/api/apps/admin/docstore/{{$.col}}">Reset search</a>{{ end }}</p>
 </form>
 
 <details style="margin-bottom:20px;">
@@ -91,34 +72,18 @@ end{{ end }}</textarea>
 
 </details>
 
-
 <div>
     {{ range .docs }}
 	<div style="margin-bottom:30px;border-top:1px dashed #ccc;padding-top:20px;">
     {{ $cdoc := . }}
-    {{ if $.schema }}
-    {{ range $.schema }}
-    {{ $v := index $cdoc.doc .field_name }}
-
-    {{ if eq .field_type "STR" }}
-    {{ if $v }}<div>{{if .render_prefix}}{{ htmlify .render_prefix }}{{end}}{{ $v }}{{ if .render_suffix }}{{ htmlify .render_suffix }}{{ end }}</div>{{ end }}
-    {{ end }}
-
-    {{ if eq .field_type "MD" }}
-    {{ if $v }}<div>{{if .render_prefix}}{{ htmlify .render_prefix }}{{end}}{{ markdownify $v }} {{ if .render_suffix }}{{ htmlify .render_suffix }}{{ end }}</div>{{ end }}
-    {{ end }}
-
-    {{ end }}
     <div style="text-align:right;">
     <a href="/api/apps/admin/docstore/{{$.col}}?_id={{.doc._id}}" style="font-size:0.9em;padding-top:2px;float:right;padding-left:10px;color:#444;text-decoration:underline;" class="edit-link">edit</a>
     <form method="POST" action="/api/apps/admin/docstore/{{$.col}}/remove?cid={{.doc._id}}" style="display:inline;" onsubmit="return confirm('Confirm note deletion?');"><input type="submit" class="no-button" value="remove"></form>
     <small>{{ .doc._id }}</small> | <small>{{ .doc._updated }}</small>
 	</div>
-    {{ else }}
     <pre class="code"><code>{{.js}}</code></pre>
     {{ end }}
 	</div>
-    {{ end }}
 </div>
 
 <p>{{ .stats.docs_returned }} results.</p>
@@ -127,122 +92,5 @@ end{{ end }}</textarea>
 {{ end }}
 
 {{ end }}
-
-
 {{ end }}
 
-{{ define "js" }}
-<script src="https://unpkg.com/codemirror@5.47.0/lib/codemirror.js"></script>
-<script src="https://unpkg.com/codemirror@5.47.0/mode/lua/lua.js"></script>
-<script src="https://unpkg.com/codemirror@5.47.0/mode/markdown/markdown.js"></script>
-<script src="https://unpkg.com/codemirror@5.47.0/keymap/vim.js"></script>
-<script src="https://unpkg.com/codemirror@5.47.0/addon/display/fullscreen.js"></script>
-<script>
-let myCodeMirror2 = null;
-let cid = {{if .cid }}'{{.cid}}'{{else}}null{{end}};
-let keyConf = {
-  "F11": function(cm) {
-    cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-  },
-  "F2": function(cm) {
-    CodeMirror.commands.save(cm);
-  },
-}
-let myTextArea2 = document.getElementById("md-content");
-myCodeMirror2 = CodeMirror.fromTextArea(myTextArea2, {mode: "markdown", keyMap: "vim", theme: "solarized light",  extraKeys: keyConf});
-if (window.localStorage.hasOwnProperty("content_"+cid)) {
-  let content = window.localStorage.getItem("content_"+cid);
-  if (content != myCodeMirror2.getValue()) {
-    if (confirm("load content from local cache?")) {
-      myCodeMirror2.setValue(content);
-    } else {
-      window.localStorage.removeItem("content_"+cid);
-    }
-  } else {
-    window.localStorage.removeItem("content_"+cid);
-  }
-}
-let changeGen = -1;
-var inputKey = function(k, id) {
-  hotkeys(k, function(event, handler){
-    // Prevent the default refresh event under WINDOWS system
-    event.preventDefault();
-    document.getElementById(id).focus();
-  })
-}
-// Note title focus
-inputKey("t", "str-title");
-// Search box focus
-inputKey("s", "qs"); 
-// Content focus
-hotkeys("c", function(event, handler) { event.preventDefault(); myCodeMirror2.focus();
-  myCodeMirror2.setOption("fullScreen", true);
-});
-// Edit the first note
-hotkeys("e", function(evnet, handler) { event.preventDefault();
-    document.querySelector(".edit-link").click();
-});
-CodeMirror.commands.save = function () {
-  if (cid === null) {
-    // XXX(tsileo): handle the new doc case saved this way (set the CID via the JSON resp?)?
-    return;
-  }
-  if (myCodeMirror2.doc.isClean(changeGen)) {
-    console.log("nothing to save");
-    return;
-  }
-  console.log("Saving");
-    let formElement = document.getElementsByTagName("form")[0];
-    let fdata = new FormData()
-    fdata.set("title", document.getElementById("str-title").value);
-    fdata.set("content", myCodeMirror2.getValue());
-    fetch(formElement.action, {
-            method: 'post',
-            body: new URLSearchParams(fdata),
-    }).then(function(response) {
-      if (response.status != 200) {
-        throw Error(response.statusText);
-      } else {
-        console.log(response);
-        console.log("saved");
-        changeGen = myCodeMirror2.doc.changeGeneration();
-        window.localStorage.removeItem("content_"+cid);
-      }
-    }).catch(function(error) {
-      console.log("failed to save");
-      window.localStorage.setItem("content_"+cid, myCodeMirror2.getValue());
-      alert("failed to saved, content saved to the local cache");
-    })
-};
-CodeMirror.Vim.defineEx("quit", "q", function (cm) {
-  document.getElementById("submit-vim").click();
-});
-hotkeys("ctrl+c", function(event, handler) { event.preventDefault();
-  event.preventDefault();
-  if (document.getElementById("reset-search")) {
-    document.getElementById("reset-search").click();
-  }
-});
-let pres = document.querySelectorAll("pre code");
-for (var i = 0;i<pres.length;i++){
-  let id = "cc" + i;
-  let code = pres[i];
-  let pre = code.parentNode;
-  pre.id += id;
-  let btn = document.createElement("button");
-  btn.className += "cc";
-  btn.innerText = "copy";
-  btn.dataset.clipboardTarget = "#" + id;
-  pre.parentNode.insertBefore(btn, pre);
-}
-let clipboard = new ClipboardJS('.cc');
-clipboard.on('success', function(e) {
-  e.clearSelection();
-})
-window.onbeforeunload = function() {
-  if (changeGen != -1 && !myCodeMirror2.isClean(changeGen)) {
-    return "There is unsaved changes"
-  }
-};
-</script>
-{{ end }}
