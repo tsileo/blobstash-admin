@@ -2,7 +2,6 @@ local template = require('template')
 local extra = require('extra')
 local json = require('json')
 local router = require('router').new()
-local gs = require('gitserver')
 local kvs = require('kvstore')
 local ft = require('filetree')
 local bs = require('blobstore')
@@ -188,76 +187,6 @@ router:post('/docstore/:col', function(params)
     table.insert(jdocs, {doc=d, js=json.encode(d)})
   end
   app.response:write(template.render('docstore.html', 'layout.html', { stats = stats, code = code, col = params.col, collections = {}, docs = jdocs }))
-end)
-
-
-
-router:get('/git', function(params)
-  local data = {}
-  -- TODO(tsileo): support /git/:ns
-  for _, ns in ipairs(gs.namespaces()) do
-    for _, repo in ipairs(gs.repositories(ns)) do
-      table.insert(data, {ns = ns, repo = repo })
-    end
-  end
-  app.response:write(template.render('git_repo.html', 'layout.html', { data = data }))
-end)
-
-router:get('/git/:ns/:repo/commit/:hash', function(params)
-  local repo = gs.repo(params.ns, params.repo)
-  local commit = repo:get_commit(params.hash)
-  app.response:write(template.render('git_repo.html', 'layout.html', { name = params.name, ns = params.ns, repo = params.repo, commit = commit }))
-end)
-
-router:get('/git/:ns/:repo/log', function(params)
-  local repo = gs.repo(params.ns, params.repo)
-  local log = repo:log()
-  app.response:write(template.render('git_repo.html', 'layout.html', { name = params.name, ns = params.ns, repo = params.repo, log = log }))
-end)
-
-router:get('/git/:ns/:repo/file/:hash/:name/plain', function(params)
-  local repo = gs.repo(params.ns, params.repo)
-  local file = repo:get_file(params.hash)
-  local dl = false
-  if app.request:args():get("dl") == "1" then
-    dl = true
-    app.response:headers():set("Content-Disposition", "attachment; filename=" .. params.name)
-  end
-
-  if not file.is_binary or dl then
-    app.response:write(file.contents)
-    return
-  end
-  return '[binary file, please donwload it]'
-end)
-
-router:get('/git/:ns/:repo/file/:hash/:name', function(params)
-  local repo = gs.repo(params.ns, params.repo)
-  local file = repo:get_file(params.hash)
-  app.response:write(template.render('git_repo.html', 'layout.html', { name = params.name, file = file, ns = params.ns, repo = params.repo }))
-end)
-
-router:get('/git/:ns/:repo/tree/:hash', function(params)
-  -- TODO(tsileo): find a way to keep a breadcrumb (of the path in the tree), in the URL, JSON encoded
-  local repo = gs.repo(params.ns, params.repo)
-  local tree = repo:get_tree(params.hash)
-  app.response:write(template.render('git_repo.html', 'layout.html', { tree = tree, ns = params.ns, repo = params.repo }))
-end)
-
-router:get('/git/:ns/:repo/tree', function(params)
-  local repo = gs.repo(params.ns, params.repo)
-  local tree = repo:tree()
-  app.response:write(template.render('git_repo.html', 'layout.html', { tree = tree, ns = params.ns, repo = params.repo }))
-end)
-
-router:get('/git/:ns/:repo/refs', function(params)
-  local repo = gs.repo(params.ns, params.repo)
-  app.response:write(template.render('git_repo.html', 'layout.html', { ns = params.ns, repo = params.repo, refs = repo:refs() }))
-end)
-
-router:get('/git/:ns/:repo', function(params)
-  local repo = gs.repo(params.ns, params.repo)
-  app.response:write(template.render('git_repo.html', 'layout.html', { host = app.request:host(), scheme = app.request:scheme(), ns = params.ns, repo = params.repo, summary = repo:summary() }))
 end)
 
 router:run()

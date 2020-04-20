@@ -1,7 +1,6 @@
 {{ define "js" }}{{ end }}
 {{ define "root" }}{{ end }}
 {{ define "docstore-menu" }}{{ end }}
-{{ define "git-menu" }}{{ end }}
 {{ define "filetree-menu" }}{{ end }}
 {{ define "blobstore-menu" }}{{ end }}
 {{ define "kvstore-menu" }}{{ end }}
@@ -77,9 +76,6 @@ textarea, input {
   </li>
   <li class="nav-item {{ template "filetree-menu" . }}">
     <a href="/api/apps/admin/filetree">Filetree</a>
-  </li>
-  <li class="nav-item {{ template "git-menu" . }}">
-    <a href="/api/apps/admin/git">Git Repositories</a>
   </li>
   <li class="nav-item">
     <a href="/api/apps/admin/apps">Apps</a>
